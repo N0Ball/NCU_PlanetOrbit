@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <title>Orbit</title>
+</head>
+<body>
+    <canvas id="target" style="height: 100vh;width: 100vw;"></canvas>
+    <script src="./js/planetOrbit.js"></script>
+    <script type="module">
+        import * as THREE from "./js/threejs/three.module.js";
+        import { Stage } from "./js/object/stage.module.js";
+        import { Planet } from "./js/object/advObject.module.js";
+        import { loaderManager } from "./js/loader/loader.module.js";
+        import { OrbitControls } from './js/threejs/OrbitControls.js';
+
+        class Orbits{
+            constructor(){
+                this.bodies = [];
+                this.orbitClasses = [];
+                this.orbits = [];
+            }
+
+            addPlanet(planet, orbit){
+                this.bodies.push(planet);
+                this.orbitClasses.push(orbit);
+            }
+
+            init(){
+                for(let i = 0; i < this.bodies.length; i++){
+                    this.orbits.push(new this.orbitClasses[i](this.bodies[i].body));
+                }
+            }
+
+            update(){
+                for(let orbit of this.orbits){
+                    orbit.update();
+                }
+            }
+
+            getBodies(){
+                return this.bodies;
+            }
+        }
+
+        const sun = new Planet("sun", 0.69634);
+        const orbits = new Orbits();
+        orbits.addPlanet(new Planet("mercury", 0.2439), MercuryOrbit);
+        orbits.addPlanet(new Planet("venus", 0.6051), VenusOrbit);
+        orbits.addPlanet(new Planet("earth", 0.6378), EarthOrbit);
+        orbits.addPlanet(new Planet("mars", 0.3389), MarsOrbit);
+        orbits.addPlanet(new Planet("jupiter", 7.1492), JupiterOrbit);
+        orbits.addPlanet(new Planet("saturn", 5.8232), SaturnOrbit);
+        orbits.addPlanet(new Planet("neptune", 2.4764), NeptuneOrbit);
+        orbits.addPlanet(new Planet("Uranus", 2.5362), UranusOrbit);
+
+
+        class TmpStage extends Stage{
+            firstLoad(){
+                console.log("Finish loaded");
+                orbits.init();
+            }
+            
+            onLoad(){
+                orbits.update();
+            }
+        }
+
+        const stage = new TmpStage();
+
+        stage.addCanvas('target');
+        const canvas = stage.getCanvas('target')
+        canvas.addAmbientLight();
+        const light = new THREE.PointLight( 0xffffff, 1, 100);
+        canvas.scene.add(light);
+        canvas.camera.translateZ(1000);
+        
+        const controls = new OrbitControls( canvas.camera, canvas.renderer.domElement );
+        controls.enablePan = false;
+        controls.enableDamping = true;
+
+        for(let planet of orbits.getBodies()){
+            canvas.addScene(planet);
+        }
+        canvas.addScene(sun);
+        loaderManager.init();
+
+        function update(){
+            requestAnimationFrame(update);
+
+            stage.update();
+            controls.update();
+
+        }
+
+        update()
+    </script>
+</body>
+</html>
