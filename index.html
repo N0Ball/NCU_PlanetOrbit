@@ -9,10 +9,29 @@
             margin: 0;
             padding: 0;
         }
+        .loading{
+            z-index: 99999;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+        .visible{
+            display: flex;
+        }
+        .hidden{
+            display: none;
+        }
     </style>
     <title>Orbit</title>
 </head>
 <body>
+    <div class="loading visible" id="loading">
+        <img src="./src/img/loading.gif" alt="Loading gif">
+    </div>
     <canvas id="target" style="height: 100vh;width: 100vw;"></canvas>
     <script src="./js/planetOrbit.js"></script>
     <script type="module">
@@ -22,34 +41,7 @@
         import { loaderManager } from "./js/loader/loader.module.js";
         import { OrbitControls } from './js/threejs/OrbitControls.js';
 
-        class Orbits{
-            constructor(){
-                this.bodies = [];
-                this.orbitClasses = [];
-                this.orbits = [];
-            }
-
-            addPlanet(planet, orbit){
-                this.bodies.push(planet);
-                this.orbitClasses.push(orbit);
-            }
-
-            init(){
-                for(let i = 0; i < this.bodies.length; i++){
-                    this.orbits.push(new this.orbitClasses[i](this.bodies[i].body));
-                }
-            }
-
-            update(){
-                for(let orbit of this.orbits){
-                    orbit.update();
-                }
-            }
-
-            getBodies(){
-                return this.bodies;
-            }
-        }
+        const loading = document.getElementById('loading');
 
         const sun = new Planet("sun", 0.69634);
         const orbits = new Orbits();
@@ -66,6 +58,8 @@
         class TmpStage extends Stage{
             firstLoad(){
                 console.log("Finish loaded");
+                loading.classList.remove('visible');
+                loading.classList.add('hidden');
                 orbits.init();
             }
             
@@ -98,7 +92,6 @@
 
             stage.update();
             controls.update();
-
         }
 
         update()

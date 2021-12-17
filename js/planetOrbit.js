@@ -1,3 +1,32 @@
+class Orbits{
+    constructor(){
+        this.bodies = [];
+        this.orbitClasses = [];
+        this.orbits = [];
+    }
+
+    addPlanet(planet, orbit){
+        this.bodies.push(planet);
+        this.orbitClasses.push(orbit);
+    }
+
+    init(){
+        for(let i = 0; i < this.bodies.length; i++){
+            this.orbits.push(new this.orbitClasses[i](this.bodies[i].body));
+        }
+    }
+
+    update(){
+        for(let orbit of this.orbits){
+            orbit.update();
+        }
+    }
+
+    getBodies(){
+        return this.bodies;
+    }
+}
+
 class PlanetOrbit{
     
     constructor(body, name){
