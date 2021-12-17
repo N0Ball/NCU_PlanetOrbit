@@ -1,3 +1,6 @@
+let POSITION_LENGTH = 1e4;
+let STEP = 1e2;
+
 class Orbits{
     constructor(){
         this.bodies = [];
@@ -35,7 +38,8 @@ class PlanetOrbit{
         this.G = 6.67408e-20 / 1e12;
         this.M = 1.989e30;
         this.GM = this.G * this.M;
-        this.dt = 1e1;
+        this.dt = 1e2;
+        this.positions = [];
     }
 
     setInit(){
@@ -55,7 +59,7 @@ class PlanetOrbit{
 
     update(){
 
-        for (let i = 0; i < 1e3; i++){
+        for (let i = 0; i < STEP; i++){
             this.pre_r = this.r;
             this.pre_r_p = this.r_p;
             this.pre_theta = this.theta;
@@ -67,6 +71,11 @@ class PlanetOrbit{
 
         let x = this.r * Math.cos(this.theta);
         let y = this.r * Math.sin(this.theta);
+
+        if (this.positions.length > POSITION_LENGTH){
+            this.positions.shift();
+        }
+        this.positions.push(x, y);
 
         this.body.position.x = x / 1e3;
         this.body.position.z = y / 1e3;

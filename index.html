@@ -25,6 +25,18 @@
         .hidden{
             display: none;
         }
+        #step-bar{
+            position: absolute;
+            bottom: 3rem;
+            right: 3rem;
+            width: 10%;
+        }
+        #step-bar::before{
+            content: "Step Size";
+            position: absolute;
+            left: -5rem;
+            color: white;
+        }
     </style>
     <title>Orbit</title>
 </head>
@@ -32,6 +44,8 @@
     <div class="loading visible" id="loading">
         <img src="./src/img/loading.gif" alt="Loading gif">
     </div>
+    <label for="step-bar" class="hidden">Step Speed</label>
+    <input type="range" name="step-bar" id="step-bar" min="1e2" max="1e4" value="1e2">
     <canvas id="target" style="height: 100vh;width: 100vw;"></canvas>
     <script src="./js/planetOrbit.js"></script>
     <script type="module">
@@ -42,6 +56,9 @@
         import { OrbitControls } from './js/threejs/OrbitControls.js';
 
         const loading = document.getElementById('loading');
+        const stepSize = document.getElementById('step-bar');
+
+        stepSize.oninput = () => { STEP = stepSize.value };
 
         const sun = new Planet("sun", 0.69634);
         const orbits = new Orbits();
@@ -55,20 +72,22 @@
         orbits.addPlanet(new Planet("uranus", 2.5362), UranusOrbit);
 
 
-        class TmpStage extends Stage{
+        class MyStage extends Stage{
             firstLoad(){
                 console.log("Finish loaded");
                 loading.classList.remove('visible');
                 loading.classList.add('hidden');
+                console.log(STEP);
                 orbits.init();
             }
             
             onLoad(){
+                console.log(STEP);
                 orbits.update();
             }
         }
 
-        const stage = new TmpStage();
+        const stage = new MyStage();
 
         stage.addCanvas('target');
         const canvas = stage.getCanvas('target')
