@@ -81,7 +81,7 @@
         canvas.addAmbientLight();
         const light = new THREE.PointLight( 0xffffff, 1, 100);
         canvas.scene.add(light);
-        canvas.camera.translateZ(1000);
+        canvas.camera.translateZ(50);
         
         const controls = new OrbitControls( canvas.camera, canvas.renderer.domElement );
         controls.enablePan = false;
