@@ -6,7 +6,7 @@ class PlanetOrbit{
         this.G = 6.67408e-20 / 1e12;
         this.M = 1.989e30;
         this.GM = this.G * this.M;
-        this.dt = 1e2;
+        this.dt = 1e1;
     }
 
     setInit(){

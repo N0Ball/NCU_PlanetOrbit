@@ -26,7 +26,7 @@ class Planet extends BASIC_OBJECT.Sphere{
                 void main (){
                     vertexUV = uv;
                     vertexNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + 0.25*texture2D(globeBump, uv).xyz, 1.0);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + 0.05*texture2D(globeBump, uv).xyz, 1.0);
                 }
             `,
             "fragmentShader" : `
