@@ -1,5 +1,5 @@
-let POSITION_LENGTH = 1e4;
-let STEP = 1e2;
+let MAX_POSITION_LENGTH = 1e3;
+let STEP = 1e4;
 
 class Orbits{
     constructor(){
@@ -57,6 +57,23 @@ class PlanetOrbit{
         console.log(`${this.name}: D (${D2 - D1}, ${D3 - D1})`);
     }
 
+    getCriticalR(){
+
+        let min_r = Infinity;
+        let max_r = 0
+
+        for(let position of this.positions){
+
+            let r = position[0];
+
+            if (r > max_r) max_r = r;
+            if (r < min_r) min_r = r;
+
+        }
+
+        return [max_r, min_r];
+    }
+
     update(){
 
         for (let i = 0; i < STEP; i++){
@@ -69,13 +86,14 @@ class PlanetOrbit{
             this.theta = (this.L_z / (this.m * this.pre_r ** 2)) * this.dt + this.pre_theta;
         }
 
-        let x = this.r * Math.cos(this.theta);
-        let y = this.r * Math.sin(this.theta);
-
-        if (this.positions.length > POSITION_LENGTH){
+        while(this.positions.length > MAX_POSITION_LENGTH){
             this.positions.shift();
         }
-        this.positions.push(x, y);
+
+        this.positions.push([this.r, this.theta]);
+
+        let x = this.r * Math.cos(this.theta);
+        let y = this.r * Math.sin(this.theta);
 
         this.body.position.x = x / 1e3;
         this.body.position.z = y / 1e3;

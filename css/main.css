@@ -1,0 +1,60 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.loading{
+    z-index: 99999;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+.visible{
+    display: flex;
+}
+.hidden{
+    display: none;
+}
+#choices{
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: max(20%, 250px);
+}
+label{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+}
+#planet-choice{
+    width: 70%;
+    margin-bottom: 1rem;
+}
+#planet-size{
+    width: 70%;
+    margin-bottom: 1rem;
+}
+#step-bar{
+    width: 70%;
+}
+#graph2D-container{
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 35vw;
+    height: 20vh;
+}
+#graph2D-label{
+    color: white;
+}
+#target{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}

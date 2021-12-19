@@ -4,49 +4,38 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-        }
-        .loading{
-            z-index: 99999;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-        }
-        .visible{
-            display: flex;
-        }
-        .hidden{
-            display: none;
-        }
-        #step-bar{
-            position: absolute;
-            bottom: 3rem;
-            right: 3rem;
-            width: 10%;
-        }
-        #step-bar::before{
-            content: "Step Size";
-            position: absolute;
-            left: -5rem;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/main.css">
     <title>Orbit</title>
 </head>
 <body>
     <div class="loading visible" id="loading">
         <img src="./src/img/loading.gif" alt="Loading gif">
     </div>
-    <label for="step-bar" class="hidden">Step Speed</label>
-    <input type="range" name="step-bar" id="step-bar" min="1e2" max="1e4" value="1e2">
-    <canvas id="target" style="height: 100vh;width: 100vw;"></canvas>
+    <canvas id="target"></canvas>
+    
+    <div id="choices">
+        <label for="planet-choice">
+            Planet
+            <select name="planet-choice" id="planet-choice">
+                <option value="-1"></option>
+            </select>
+        </label>
+
+        <label for="planet-size">
+            Size 
+            <input type="range" name="planet-size" id="planet-size" min="1e-1" max="1e1" value="1">
+        </label>
+
+        <label for="step-bar">
+            Step Speed
+            <input type="range" name="step-bar" id="step-bar" min="1e2" max="1e4" value="1e4">
+        </label>
+
+    </div>
+    <div id="graph2D-container">
+        <canvas id="graph-2D"></canvas>
+        <p id="graph2D-label">r to theta</p>
+    </div>
     <script src="./js/planetOrbit.js"></script>
     <script type="module">
         import * as THREE from "./js/threejs/three.module.js";
@@ -55,10 +44,29 @@
         import { loaderManager } from "./js/loader/loader.module.js";
         import { OrbitControls } from './js/threejs/OrbitControls.js';
 
-        const loading = document.getElementById('loading');
-        const stepSize = document.getElementById('step-bar');
+        let currentPlanet = undefined;
+        let critical = undefined;
+        let pre_x = 0;
+        let pre_y = 0;
+        let X_OFFSET = 0;
+        let SIZE = 0.1;
 
-        stepSize.oninput = () => { STEP = stepSize.value };
+        const loading = document.getElementById('loading');
+        const planetChoice = document.getElementById('planet-choice');
+        const planetSize = document.getElementById('planet-size');
+        const stepSize = document.getElementById('step-bar');
+        const graph2D = document.getElementById('graph-2D');
+        const graph2Dctx = graph2D.getContext('2d');
+        const graph2DLabel = document.getElementById('graph2D-label');
+
+        graph2D.width = window.innerWidth * 0.35;
+        graph2D.height = window.innerHeight * 0.2;
+        graph2Dctx.lineWidth = .5;
+
+        planetChoice.onchange = () => { initGraph(); };
+        planetSize.oninput = () => { SIZE = planetSize.value; initGraph(); };
+        stepSize.oninput = () => { STEP = stepSize.value;  };
+
 
         const sun = new Planet("sun", 0.69634);
         const orbits = new Orbits();
@@ -70,19 +78,18 @@
         orbits.addPlanet(new Planet("saturn", 5.8232), SaturnOrbit);
         orbits.addPlanet(new Planet("neptune", 2.4764), NeptuneOrbit);
         orbits.addPlanet(new Planet("uranus", 2.5362), UranusOrbit);
-
+        const bodies = orbits.getBodies();
 
         class MyStage extends Stage{
+
             firstLoad(){
                 console.log("Finish loaded");
                 loading.classList.remove('visible');
                 loading.classList.add('hidden');
-                console.log(STEP);
                 orbits.init();
             }
             
             onLoad(){
-                console.log(STEP);
                 orbits.update();
             }
         }
@@ -100,14 +107,67 @@
         controls.enablePan = false;
         controls.enableDamping = true;
 
-        for(let planet of orbits.getBodies()){
+        let index = 0;
+        for(let planet of bodies){
             canvas.addScene(planet);
+
+            const option = document.createElement('option');
+            option.value = index;
+            option.text = planet.name;
+            planetChoice.appendChild(option);
+
+            index += 1;
         }
+
         canvas.addScene(sun);
         loaderManager.init();
 
+        graph2Dctx.moveTo(0, 0);
+
+        function graphUpdate(){
+            if (currentPlanet != undefined){
+
+                let print_x = (currentPlanet.theta - X_OFFSET) / SIZE;
+                let print_y = 10 + (graph2D.height-20) * ((currentPlanet.r - critical[1])/(critical[0] - critical[1]));
+                console.log(print_x, print_y);
+
+                graph2Dctx.beginPath();
+                graph2Dctx.moveTo(pre_x, pre_y);
+                graph2Dctx.lineTo(print_x, print_y);
+                graph2Dctx.strokeStyle = '#EDFF71';
+                graph2Dctx.lineWidth = 2;
+                graph2Dctx.stroke();
+
+                pre_x = print_x;
+                pre_y = print_y;
+
+                if (print_x > graph2D.width - 10){
+                    initGraph();
+                }
+            }
+        }
+
+        function initGraph(){
+
+            graph2Dctx.closePath();
+            graph2Dctx.clearRect(0, 0, graph2D.width, graph2D.height);
+
+            currentPlanet = orbits.orbits[planetChoice.value];
+            critical = currentPlanet.getCriticalR();
+            X_OFFSET = currentPlanet.theta + 2;
+            pre_x = 2;
+            pre_y = currentPlanet.r;
+            graph2Dctx.moveTo(2, currentPlanet.r);
+
+            graph2DLabel.innerHTML = `${currentPlanet.name}'s r to theta`;
+            
+            return;
+        }
+
         function update(){
             requestAnimationFrame(update);
+
+            graphUpdate();
 
             stage.update();
             controls.update();
